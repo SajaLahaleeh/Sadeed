@@ -11,8 +11,8 @@ Many individuals, especially those who are unbanked or receive cash payments, fi
 
 ## 🌟 Our Solution
 Sadeed simplifies wealth management through:
-* **🚦 Traffic Light Visualization:** Instant status updates—**Green** (Safe), **Yellow** (Caution), and **Red** (Deficit Alert).
-* **🔮 Predictive Spending:** AI-driven alerts for upcoming rent, utilities, and subscriptions *before* they happen.
+* **🚦 Traffic Light Visualization:** Instant status updates **Green** (Safe), **Yellow** (Caution), and **Red** (Deficit Alert).
+* **🔮 Predictive Spending:** AI driven alerts for upcoming rent, utilities, and subscriptions *before* they happen.
 * **🎙️ Voice-First Entry:** Seamless voice-to-text logging for bills, perfect for on-the-go tracking and cash-based earners.
 * **⏳ Labor-Value Calculator:** A unique awareness tool that asks: *"Is this purchase worth X hours of your hard work?"*
 
