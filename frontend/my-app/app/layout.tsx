@@ -1,4 +1,4 @@
-import Link from "next/link"; // استيراد مكون الربط
+import Link from "next/link";
 import "./globals.css";
 
 export default function RootLayout({
@@ -28,7 +28,14 @@ export default function RootLayout({
               Sadeed
             </Link>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Link
+              href="/login"
+              className="px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+            >
+              تسجيل الدخول
+            </Link>
+
             <button className="p-2 hover:bg-slate-50 rounded-full">
               <span className="material-symbols-outlined text-slate-900">
                 notifications
@@ -42,12 +49,9 @@ export default function RootLayout({
           </div>
         </header>
 
-        {/* SideNavBar - Desktop */}
         <aside className="hidden lg:flex flex-col fixed right-0 top-0 h-full w-64 p-4 gap-2 bg-white border-l border-slate-200 z-40">
           <div className="flex flex-col gap-1 mb-8 mt-16 px-2">
-            <h1 className="text-xl font-extrabold text-slate-900">
-              Sadeed
-            </h1>
+            <h1 className="text-xl font-extrabold text-slate-900">Sadeed</h1>
           </div>
           <nav className="flex flex-col gap-2">
             <Link
@@ -56,6 +60,14 @@ export default function RootLayout({
             >
               <span className="material-symbols-outlined">dashboard</span>
               <span className="text-sm">لوحة التحكم</span>
+            </Link>
+
+            <Link
+              href="/login"
+              className="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors border-t border-slate-50 mt-2"
+            >
+              <span className="material-symbols-outlined">login</span>
+              <span className="text-sm font-semibold">تسجيل الدخول</span>
             </Link>
 
             <Link
@@ -92,10 +104,8 @@ export default function RootLayout({
           </nav>
         </aside>
 
-        {/* Main Content Area */}
         <main className="lg:mr-64 pt-24 px-6 pb-20">{children}</main>
 
-        {/* BottomNavBar - Mobile */}
         <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 flex justify-around items-center h-16 z-50">
           <Link
             href="/"
