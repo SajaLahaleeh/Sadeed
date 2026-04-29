@@ -61,7 +61,7 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <button className="w-full bg-black text-white py-8 rounded-2xl font-bold text-lg active:scale-[0.98] transition-all mt-4 shadow-xl shadow-black/10">
+              <button className="w-full bg-black text-white p-8 rounded-2xl font-bold text-lg active:scale-[0.98] transition-all mt-4 shadow-xl shadow-black/10">
                 تسجيل الدخول
               </button>
             </form>

@@ -7,7 +7,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <main className="min-h-screen flex flex-col font-['Noto_Kufi_Arabic']">
+    <main className="min-h-screen flex flex-col p-2 font-['Noto_Kufi_Arabic']">
       <main className="flex-grow flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
           <div className="bg-white p-8 md:p-10 rounded-[2rem] shadow-[0px_16px_32px_rgba(19,27,46,0.04)] border border-slate-100">
