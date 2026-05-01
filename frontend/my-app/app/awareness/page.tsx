@@ -1,4 +1,107 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import api from "@/lib/api";
+
 export default function AwarenessPage() {
+  const [monthlyIncome, setMonthlyIncome] = useState("");
+  const [workHours, setWorkHours] = useState("");
+  const [itemPrice, setItemPrice] = useState("");
+  const [result, setResult] = useState<null | {
+    itemPrice: number;
+    hourlyRate: number;
+    workHoursNeeded: number;
+    workDaysNeeded: number;
+    impulseIndex: string;
+    message: string;
+    suggestion: string;
+  }>(null);
+  const [tips, setTips] = useState<any[]>([]);
+  const [randomTip, setRandomTip] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [calculating, setCalculating] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check if user is logged in
+    if (!api.isAuthenticated()) {
+      router.push("/login");
+      return;
+    }
+    fetchTips();
+    loadUserData();
+  }, []);
+
+  const fetchTips = async () => {
+    try {
+      const [allTips, random] = await Promise.all([
+        api.getAwarenessTips(),
+        api.getRandomTip(),
+      ]);
+      setTips(allTips);
+      setRandomTip(random);
+    } catch (error) {
+      console.error("Failed to fetch tips:", error);
+    }
+  };
+
+  const loadUserData = async () => {
+    try {
+      // Use getProfile from your API service
+      const user = await api.getProfile();
+      
+      if (user.monthlyNetIncome) {
+        setMonthlyIncome(user.monthlyNetIncome.toString());
+      }
+      if (user.workHoursPerMonth) {
+        setWorkHours(user.workHoursPerMonth.toString());
+      }
+    } catch (error) {
+      console.error("Failed to load user data:", error);
+      // Set default values
+      setMonthlyIncome("10000");
+      setWorkHours("160");
+    }
+  };
+
+  const calculateTimeValue = async () => {
+    if (!itemPrice || parseFloat(itemPrice) <= 0) {
+      alert("الرجاء إدخال سعر السلعة");
+      return;
+    }
+
+    setCalculating(true);
+    try {
+      const response = await api.calculateTimeValue(
+        undefined,
+        parseFloat(itemPrice),
+        monthlyIncome ? parseFloat(monthlyIncome) : undefined,
+        workHours ? parseInt(workHours) : undefined
+      );
+      setResult(response);
+    } catch (error) {
+      console.error("Calculation failed:", error);
+      alert("فشل في حساب التكلفة. يرجى المحاولة مرة أخرى");
+    } finally {
+      setCalculating(false);
+    }
+  };
+
+  const getImpulseIndexColor = (index: string) => {
+    if (index.includes("Low")) return "bg-green-100 text-green-700";
+    if (index.includes("Moderate")) return "bg-yellow-100 text-yellow-700";
+    if (index.includes("High")) return "bg-orange-100 text-orange-700";
+    return "bg-red-100 text-red-700";
+  };
+
+  const getImpulseIndexArabic = (index: string) => {
+    if (index.includes("Low")) return "مخاطرة منخفضة";
+    if (index.includes("Moderate")) return "مخاطرة متوسطة";
+    if (index.includes("High")) return "مخاطرة عالية";
+    return "مخاطرة حرجة";
+  };
+
   return (
     <div className="max-w-5xl mx-auto">
       <section className="mb-8">
@@ -12,6 +115,7 @@ export default function AwarenessPage() {
       </section>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        {/* Calculator Section */}
         <div className="md:col-span-7 bg-white p-8 rounded-xl shadow-sm border border-slate-100 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-1 h-full bg-[#006c49]"></div>
           <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
@@ -30,6 +134,8 @@ export default function AwarenessPage() {
                   className="w-full p-4 bg-slate-50 border-none rounded-lg focus:ring-2 focus:ring-black outline-none transition-all"
                   placeholder="مثال: 10,000"
                   type="number"
+                  value={monthlyIncome}
+                  onChange={(e) => setMonthlyIncome(e.target.value)}
                 />
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
                   ريال
@@ -44,6 +150,8 @@ export default function AwarenessPage() {
                 className="w-full p-4 bg-slate-50 border-none rounded-lg focus:ring-2 focus:ring-black outline-none transition-all"
                 placeholder="مثال: 160"
                 type="number"
+                value={workHours}
+                onChange={(e) => setWorkHours(e.target.value)}
               />
             </div>
             <div>
@@ -55,101 +163,106 @@ export default function AwarenessPage() {
                   className="w-full p-4 bg-slate-50 border-none rounded-lg focus:ring-2 focus:ring-[#006c49] outline-none transition-all"
                   placeholder="مثال: 3,500"
                   type="number"
+                  value={itemPrice}
+                  onChange={(e) => setItemPrice(e.target.value)}
                 />
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
                   ريال
                 </span>
               </div>
             </div>
-            <button className="w-full bg-black text-white py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all flex justify-center items-center gap-2 shadow-sm">
-              تحليل التكلفة الحقيقية
+            <button
+              onClick={calculateTimeValue}
+              disabled={calculating}
+              className="w-full bg-black text-white py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all flex justify-center items-center gap-2 shadow-sm disabled:opacity-50"
+            >
+              {calculating ? "جاري التحليل..." : "تحليل التكلفة الحقيقية"}
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
           </div>
         </div>
 
+        {/* Result Section */}
         <div className="md:col-span-5 flex flex-col gap-6">
-          <div className="bg-[#131b2e] p-8 rounded-xl text-white flex-1 relative overflow-hidden transition-transform hover:scale-[1.02]">
+          <div className={`bg-[#131b2e] p-8 rounded-xl text-white flex-1 relative overflow-hidden transition-transform hover:scale-[1.02] ${result ? 'border-2 border-[#6cf8bb]' : ''}`}>
             <div className="relative z-10">
               <p className="text-xs opacity-70 uppercase tracking-widest mb-2">
                 التكلفة الحقيقية
               </p>
-              <h2 className="text-6xl font-extrabold mb-2 text-white">56</h2>
-              <p className="text-xl text-[#6cf8bb]">ساعة من حياتك</p>
-              <div className="mt-8 pt-8 border-t border-white/10">
-                <p className="text-sm leading-relaxed opacity-90">
-                  هذا يعني أنك ستقضي{" "}
-                  <span className="font-bold">أسبوع عمل كامل</span> لتغطية تكلفة
-                  هذا المنتج فقط.
-                </p>
-              </div>
+              {result ? (
+                <>
+                  <h2 className="text-6xl font-extrabold mb-2 text-white">
+                    {Math.round(result.workHoursNeeded)}
+                  </h2>
+                  <p className="text-xl text-[#6cf8bb]">ساعة من حياتك</p>
+                  <div className="mt-8 pt-8 border-t border-white/10">
+                    <p className="text-sm leading-relaxed opacity-90">
+                      {result.message}
+                    </p>
+                    {result.suggestion && (
+                      <p className="text-sm leading-relaxed opacity-80 mt-3 text-[#6cf8bb]">
+                        💡 {result.suggestion}
+                      </p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-center py-8">
+                    <span className="material-symbols-outlined text-6xl opacity-50">
+                      calculate
+                    </span>
+                    <p className="text-sm opacity-70 mt-4">
+                      أدخل سعر السلعة واضغط على "تحليل التكلفة الحقيقية"
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
             <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#006c49]/10 rounded-full blur-3xl"></div>
           </div>
-          <div className="bg-white p-6 rounded-xl border border-slate-100 flex items-center gap-4 transition-all hover:shadow-md">
-            <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center">
-              <span className="material-symbols-outlined text-red-600">
-                priority_high
-              </span>
-            </div>
-            <div>
-              <p className="text-xs text-slate-500">مؤشر الاندفاع</p>
-              <p className="text-md font-bold text-black">مخاطرة متوسطة</p>
-            </div>
-          </div>
-        </div>
 
-        <div className="md:col-span-12 lg:col-span-4 bg-[#6cf8bb]/10 p-8 rounded-xl border border-[#6cf8bb]/20 hover:bg-[#6cf8bb]/20 transition-colors">
-          <span className="material-symbols-outlined text-[#006c49] text-4xl mb-4">
-            visibility
-          </span>
-          <h4 className="text-xl font-bold mb-2 text-black">
-            قاعدة الـ 24 ساعة
-          </h4>
-          <p className="text-sm text-slate-600 leading-relaxed">
-            انتظر يوماً كاملاً قبل إتمام أي عملية شراء غير ضرورية تزيد تكلفتها
-            عن 5 ساعات عمل. غالباً ما يختفي الحماس للشراء وتكتشف أنك لا تحتاجها
-            حقاً.
-          </p>
-        </div>
-
-        <div className="md:col-span-6 lg:col-span-4 bg-white p-8 rounded-xl border border-slate-100 shadow-sm group hover:shadow-md transition-all">
-          <div className="overflow-hidden rounded-lg mb-6 bg-slate-100 h-40 flex items-center justify-center">
-            <span className="material-symbols-outlined text-slate-300 text-5xl">
-              image
-            </span>
-          </div>
-          <h4 className="text-xl font-bold mb-2 text-black">
-            هل يستحق العناء؟
-          </h4>
-          <p className="text-sm text-slate-600 leading-relaxed">
-            بمجرد أن تحول المال إلى ساعات، ستجد أن قرار الشراء أصبح أكثر منطقية
-            وأقل عاطفية. فكر في الجهد المبذول مقابل المنفعة.
-          </p>
-        </div>
-
-        <div className="md:col-span-6 lg:col-span-4 bg-white p-8 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-3 h-3 rounded-full bg-[#006c49]"></span>
-              <span className="text-xs font-semibold text-slate-500">
-                مقارنة سريعة
-              </span>
+          {/* Impulse Index */}
+          {result && (
+            <div className={`bg-white p-6 rounded-xl border border-slate-100 flex items-center gap-4 transition-all hover:shadow-md ${getImpulseIndexColor(result.impulseIndex)}`}>
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                result.impulseIndex.includes("Low") ? "bg-green-50" :
+                result.impulseIndex.includes("Moderate") ? "bg-yellow-50" :
+                result.impulseIndex.includes("High") ? "bg-orange-50" : "bg-red-50"
+              }`}>
+                <span className="material-symbols-outlined text-inherit">
+                  {result.impulseIndex.includes("Low") ? "check_circle" :
+                   result.impulseIndex.includes("Moderate") ? "warning" :
+                   result.impulseIndex.includes("High") ? "priority_high" : "error"}
+                </span>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500">مؤشر الاندفاع</p>
+                <p className="text-md font-bold text-black">
+                  {getImpulseIndexArabic(result.impulseIndex)}
+                </p>
+              </div>
             </div>
-            <h4 className="text-xl font-bold mb-2 text-black">
-              كم تكلفة قهوتك؟
-            </h4>
-            <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-              كوب القهوة اليومي (25 ريال) قد يكلفك 15 دقيقة من العمل. سنوياً،
-              هذا يعني 60 ساعة عمل!
-            </p>
-          </div>
-          <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-            <div className="bg-[#006c49] h-full w-2/3 transition-all duration-1000"></div>
-          </div>
+          )}
         </div>
       </div>
 
+      {/* Random Tip Card */}
+      {randomTip && (
+        <div className="mt-6 bg-[#6cf8bb]/10 p-8 rounded-xl border border-[#6cf8bb]/20 hover:bg-[#6cf8bb]/20 transition-colors">
+          <span className="material-symbols-outlined text-[#006c49] text-4xl mb-4">
+            {randomTip.category === "Savings" ? "savings" :
+             randomTip.category === "Budgeting" ? "bar_chart" :
+             randomTip.category === "Mindful Spending" ? "psychology" : "lightbulb"}
+          </span>
+          <h4 className="text-xl font-bold mb-2 text-black">{randomTip.title}</h4>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            {randomTip.content}
+          </p>
+        </div>
+      )}
+
+      {/* Call to Action */}
       <section className="mt-12 bg-slate-100 p-8 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex-1">
           <h3 className="text-xl font-bold mb-2 text-black">

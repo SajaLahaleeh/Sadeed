@@ -2,13 +2,38 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import api from "@/lib/api";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      // Call backend API
+      const response = await api.login(email, password);
+      console.log("Login successful:", response);
+      
+      // Redirect to dashboard on success
+      router.push("/");
+    } catch (err: any) {
+      setError(err.message || "فشل تسجيل الدخول. يرجى التحقق من بياناتك");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="min-h-screen flex flex-col">
-
       <div className="flex-grow flex items-center justify-center p-6">
         <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 p-4 bg-white rounded-[2.5rem] overflow-hidden shadow-[0px_20px_60px_rgba(0,0,0,0.05)] border border-slate-100">
           <div className="p-10 md:p-16 flex flex-col justify-center">
@@ -21,7 +46,14 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <form className="space-y-5 p-8" onSubmit={(e) => e.preventDefault()}>
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-right">
+                {error}
+              </div>
+            )}
+
+            <form className="space-y-5 p-8" onSubmit={handleSubmit}>
               <div className="space-y-4 my-4">
                 <label className="text-xs mt-4 font-bold text-slate-400 block px-1 text-right">
                   البريد الإلكتروني
@@ -30,6 +62,10 @@ export default function LoginPage() {
                   className="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none font-medium"
                   placeholder="name@example.com"
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  dir="ltr"
                 />
               </div>
 
@@ -39,7 +75,7 @@ export default function LoginPage() {
                     كلمة المرور
                   </label>
                   <Link
-                    href="#"
+                    href="/forgot-password"
                     className="text-xs font-bold text-[#006c49] hover:underline"
                   >
                     نسيت كلمة المرور؟
@@ -50,6 +86,10 @@ export default function LoginPage() {
                     className="w-full px-5 py-4 rounded-2xl mb-8 border border-slate-100 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none font-medium"
                     placeholder="••••••••"
                     type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    dir="ltr"
                   />
                   <button
                     type="button"
@@ -61,11 +101,14 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <button className="w-full bg-black text-white p-8 rounded-2xl font-bold text-lg active:scale-[0.98] transition-all mt-4 shadow-xl shadow-black/10">
-                تسجيل الدخول
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-black text-white p-8 rounded-2xl font-bold text-lg active:scale-[0.98] transition-all mt-4 shadow-xl shadow-black/10 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
               </button>
             </form>
-
 
             <p className="mt-10 text-center font-bold text-sm text-slate-500">
               ليس لديك حساب؟{" "}

@@ -1,6 +1,12 @@
-2026-04-30 23:08:26.960822+03:00 jdbc[46]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * [*]User"; SQL statement:
-SELECT * User [42000-232]
-2026-04-30 23:08:33.826451+03:00 jdbc[46]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * [*]Users"; SQL statement:
-SELECT * Users [42000-232]
+2026-05-01 23:00:21.264369+03:00 jdbc[4]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * FROM[*]"; expected "identifier"; SQL statement:
+SELECT * FROM [42001-232]
+2026-05-01 23:06:21.517850+03:00 jdbc[9]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "[*]SELEST * FROM USERS"; expected "SAVEPOINT, SCRIPT, SHUTDOWN"; SQL statement:
+SELEST * FROM USERS [42001-232]
+2026-05-01 23:06:26.205563+03:00 jdbc[9]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "[*]SELEST * FROM USERS"; expected "SAVEPOINT, SCRIPT, SHUTDOWN"; SQL statement:
+SELEST * FROM USERS [42001-232]
+2026-05-01 23:06:39.088466+03:00 jdbc[9]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "[*]SELEST * FROM USERS"; expected "SAVEPOINT, SCRIPT, SHUTDOWN"; SQL statement:
+SELEST * FROM USERS [42001-232]

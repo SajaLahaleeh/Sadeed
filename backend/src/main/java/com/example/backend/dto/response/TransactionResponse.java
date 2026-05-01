@@ -14,12 +14,12 @@ public class TransactionResponse {
     private String categoryName;
     private String categoryIcon;
     
-    // Constructors
     public TransactionResponse() {}
     
-    public TransactionResponse(Long id, Double amount, String description, LocalDateTime transactionDate, 
-                               PaymentMethod paymentMethod, TransactionType transactionType, 
-                               String categoryName, String categoryIcon) {
+    public TransactionResponse(Long id, Double amount, String description, 
+                               LocalDateTime transactionDate, PaymentMethod paymentMethod,
+                               TransactionType transactionType, String categoryName, 
+                               String categoryIcon) {
         this.id = id;
         this.amount = amount;
         this.description = description;

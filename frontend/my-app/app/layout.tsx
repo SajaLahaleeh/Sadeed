@@ -1,11 +1,39 @@
+"use client";
 import Link from "next/link";
 import "./globals.css";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    router.push("/login");
+  };
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      setIsLoggedIn(!!token);
+    };
+
+    checkAuth();
+    
+    // Optional: Listen for storage changes (if token changes in another tab)
+    window.addEventListener("storage", checkAuth);
+
+    return () => {
+      window.removeEventListener("storage", checkAuth);
+    };
+  }, []);
+
   return (
     <html lang="ar" dir="rtl">
       <head>
@@ -29,12 +57,23 @@ export default function RootLayout({
             </Link>
           </div>
           <div className="flex items-center gap-2">
-            <Link
-              href="/login"
-              className="px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
-            >
-              تسجيل الدخول
-            </Link>
+                <div className="flex items-center gap-4">
+      {isLoggedIn ? (
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+        >
+          تسجيل خروج
+        </button>
+      ) : (
+        <Link
+          href="/login"
+          className="px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+        >
+          تسجيل الدخول
+        </Link>
+      )}
+    </div>
 
             <button className="p-2 hover:bg-slate-50 rounded-full">
               <span className="material-symbols-outlined text-slate-900">

@@ -2,14 +2,12 @@ package com.example.backend.controller;
 
 import com.example.backend.entity.User;
 import com.example.backend.service.DashboardService;
-import com.example.backend.service.TransactionService;
 import com.example.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,9 +16,6 @@ public class DashboardController {
 
     @Autowired
     private DashboardService dashboardService;
-    
-    @Autowired
-    private TransactionService transactionService;
     
     @Autowired
     private UserService userService;
@@ -32,7 +27,16 @@ public class DashboardController {
             return ResponseEntity.notFound().build();
         }
         
-        Map<String, Object> summary = dashboardService.getDashboardSummary(user.get());
+        Map<String, Object> summary = new HashMap<>();
+        Map<String, Object> dashboardData = dashboardService.getDashboardSummary(user.get());
+        
+        // Return a clean map without circular references
+        summary.put("totalBalance", dashboardData.get("totalBalance"));
+        summary.put("monthlyExpenses", dashboardData.get("monthlyExpenses"));
+        summary.put("totalDebt", dashboardData.get("totalDebt"));
+        summary.put("balanceStatus", dashboardData.get("balanceStatus"));
+        summary.put("expenseStatus", dashboardData.get("expenseStatus"));
+        
         return ResponseEntity.ok(summary);
     }
 
