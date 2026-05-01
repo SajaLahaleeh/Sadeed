@@ -5,6 +5,8 @@ import com.example.backend.dto.request.RegisterRequest;
 import com.example.backend.dto.response.AuthResponse;
 import com.example.backend.entity.User;
 import com.example.backend.service.UserService;
+import com.example.backend.util.JwtUtil;
+
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,9 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         try {
@@ -27,8 +32,11 @@ public class AuthController {
                 request.getPassword()
             );
             
+            // Generate JWT token for new user
+            String token = jwtUtil.generateToken(user.getEmail(), user.getId());
+            
             AuthResponse response = new AuthResponse(
-                "temp_token_" + user.getId(),
+                token,
                 user.getEmail(),
                 user.getFullName(),
                 "Registration successful!"
@@ -40,23 +48,26 @@ public class AuthController {
         }
     }
 
-@PostMapping("/login")
-public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
-    var user = userService.findByEmail(request.getEmail());
-    
-    if (user.isPresent() && userService.verifyPassword(request.getPassword(), user.get().getPassword())) {
-        AuthResponse response = new AuthResponse(
-            "temp_token_" + user.get().getId(),
-            user.get().getEmail(),
-            user.get().getFullName(),
-            "Login successful!"
-        );
-        return ResponseEntity.ok(response);
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+        var user = userService.findByEmail(request.getEmail());
+        
+        if (user.isPresent() && userService.verifyPassword(request.getPassword(), user.get().getPassword())) {
+            // Generate real JWT token
+            String token = jwtUtil.generateToken(user.get().getEmail(), user.get().getId());
+            
+            AuthResponse response = new AuthResponse(
+                token,  // Now using real JWT!
+                user.get().getEmail(),
+                user.get().getFullName(),
+                "Login successful!"
+            );
+            return ResponseEntity.ok(response);
+        }
+        
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body("Invalid email or password");
     }
-    
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-        .body("Invalid email or password");
-}
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
@@ -69,16 +80,16 @@ public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
     }
 
     @PostMapping("/test-create")
-public ResponseEntity<?> createTestUser() {
-    try {
-        User user = userService.registerUser(
-            "Test User",
-            "test@example.com",
-            "test123"
-        );
-        return ResponseEntity.ok(user);
-    } catch (Exception e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
-}
+    public ResponseEntity<?> createTestUser() {
+        try {
+            User user = userService.registerUser(
+                "Test User",
+                "test@example.com",
+                "test123"
+            );
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }   
 }
