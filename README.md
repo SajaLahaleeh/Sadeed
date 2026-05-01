@@ -32,6 +32,45 @@ Sadeed simplifies wealth management through:
 
 ---
 
+## 💻 How to Run Locally
+
+Follow these steps to get Sadeed up and running on your machine.
+
+### 📋 Prerequisites
+
+Make sure you have the following installed:
+
+- **Git** – [Download here](https://git-scm.com/)
+- **Node.js** (v18 or higher) – [Download here](https://nodejs.org/)
+- **npm** or **yarn** – Comes with Node.js
+- **Java JDK 17+** – [Download here](https://www.oracle.com/java/technologies/downloads/)
+- **PostgreSQL** (optional, for production) – [Download here](https://www.postgresql.org/download/)
+
+### 🔧 Installation Steps
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/SajaLahaleeh/Sadeed.git
+cd sadeed
+
+# 2. Install frontend dependencies
+cd frontend
+npm install
+
+# 3. Install backend dependencies
+cd ../backend
+./mvnw install
+
+# 4. Run backend server (keep this terminal open)
+cd ../backend
+./mvnw spring-boot:run
+
+# 5. Open a new terminal and run frontend
+cd ../frontend/my-app
+npm start
+
+---
+
 ## 👥 Team
 * **[Sajalahaleeh]** - Backend Java Developer
 * **[mriana9]** - Frontend Developer
