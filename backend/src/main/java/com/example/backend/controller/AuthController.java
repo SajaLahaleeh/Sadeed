@@ -44,19 +44,14 @@ public class AuthController {
 public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
     var user = userService.findByEmail(request.getEmail());
     
-    if (user.isPresent()) {
-        // Use password encoder to verify
-        boolean passwordMatches = userService.verifyPassword(request.getPassword(), user.get().getPassword());
-        
-        if (passwordMatches) {
-            AuthResponse response = new AuthResponse(
-                "temp_token_" + user.get().getId(),
-                user.get().getEmail(),
-                user.get().getFullName(),
-                "Login successful!"
-            );
-            return ResponseEntity.ok(response);
-        }
+    if (user.isPresent() && userService.verifyPassword(request.getPassword(), user.get().getPassword())) {
+        AuthResponse response = new AuthResponse(
+            "temp_token_" + user.get().getId(),
+            user.get().getEmail(),
+            user.get().getFullName(),
+            "Login successful!"
+        );
+        return ResponseEntity.ok(response);
     }
     
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

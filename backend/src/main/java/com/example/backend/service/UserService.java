@@ -15,6 +15,8 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public User registerUser(String fullName, String email, String password) {
         // Check if user already exists
@@ -25,7 +27,7 @@ public class UserService {
         User user = new User();
         user.setFullName(fullName);
         user.setEmail(email);
-        user.setPassword(password); // Will be encoded later with BCrypt
+        user.setPassword(passwordEncoder.encode(password)); // Encoded!
         user.setRole(UserRole.USER);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
@@ -49,9 +51,9 @@ public class UserService {
         user.setUpdatedAt(LocalDateTime.now());
         return userRepository.save(user);
     }
-private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
+    
+    // Verify password (for login)
     public boolean verifyPassword(String rawPassword, String encodedPassword) {
-    return passwordEncoder.matches(rawPassword, encodedPassword);
-}
+        return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
 }
